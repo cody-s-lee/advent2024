@@ -1,4 +1,5 @@
 import argparse
+from operator import countOf
 
 
 def example():
@@ -22,7 +23,7 @@ def example():
 
 
 def day01(reader):
-    result = 0
+    result_a = 0
     lefts = []
     rights = []
     for i, line in enumerate(reader):
@@ -44,9 +45,14 @@ def day01(reader):
     for i in range(len(lefts)):
         l, r = lefts[i], rights[i]
 
-        result += abs(l - r)
+        result_a += abs(l - r)
 
-    return result
+    result_b = 0
+
+    for l in lefts:
+        result_b += l * countOf(rights, l)
+
+    return result_a, result_b
 
 
 def do(reader, processor):
