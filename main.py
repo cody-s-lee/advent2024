@@ -1,7 +1,4 @@
 import argparse
-import urllib.request
-
-import ssl
 
 
 def example():
@@ -18,14 +15,10 @@ def example():
     func = funcs[args.day]
     input_url = f'https://adventofcode.com/2024/day/{args.day}/input'
 
-    # Create an SSL context
-    ssl_context = ssl.create_default_context()
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
-
     # Execute
-    with urllib.request.urlopen(input_url, context=ssl_context) as response:
-        print(func(response.read().decode('utf-8').split("\n")))
+    with open(f'day{args.day:02d}.txt', 'r') as file:
+        print(func(file.read().split("\n")))
+
 
 
 def day01(reader):
@@ -39,7 +32,7 @@ def day01(reader):
         print(f'{i}: {line}')
 
         line = line.strip()
-        left, right = line.split(" ")
+        left, right = line.split(" ", maxsplit=1)
         lefts.append(int(left))
         rights.append(int(right))
 
@@ -52,7 +45,7 @@ def day01(reader):
         l, r = lefts[i], rights[i]
 
         result += abs(l - r)
-        
+
     return result
 
 
