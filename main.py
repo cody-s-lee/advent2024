@@ -25,14 +25,35 @@ def example():
 
     # Execute
     with urllib.request.urlopen(input_url, context=ssl_context) as response:
-        print(do(response.read().decode('utf-8').split("\n"), func))
+        print(func(response.read().decode('utf-8').split("\n")))
 
 
-def day01(line):
-    # Count number of unique letters in the line
-    unique = set(line)
+def day01(reader):
+    result = 0
+    lefts = []
+    rights = []
+    for i, line in enumerate(reader):
+        if len(line) == 0:
+            continue
 
-    return len(unique)
+        print(f'{i}: {line}')
+
+        line = line.strip()
+        left, right = line.split(" ")
+        lefts.append(int(left))
+        rights.append(int(right))
+
+    lefts = sorted(lefts)
+    rights = sorted(rights)
+
+    assert len(lefts) == len(rights)
+
+    for i in range(len(lefts)):
+        l, r = lefts[i], rights[i]
+
+        result += abs(l - r)
+        
+    return result
 
 
 def do(reader, processor):
