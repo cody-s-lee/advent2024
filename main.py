@@ -1,4 +1,5 @@
 import argparse
+import itertools
 from operator import countOf
 
 
@@ -54,6 +55,44 @@ def day01(reader):
 
     return result_a, result_b
 
+def pairwise(iterable):
+    """s -> (s0, s1), (s1, s2), (s2, s3), ..."""
+    a, b = itertools.tee(iterable)
+    next(b, None)
+    return zip(a, b)
+
+def day02(reader):
+    result_a = 0
+    for i, line in enumerate(reader):
+        if len(line) == 0:
+            continue
+
+        print(f'{i}: {line}: ', end='')
+
+        levels = [int(l) for l in line.split(" ")]
+
+        direction = 0
+        for (x, y) in pairwise(levels):
+            if abs(x - y) <1 or abs(x-y) > 3:
+                print('unsafe')
+                break # unsafe
+
+            if direction == 0:
+                direction = 1 if x < y else -1
+
+            if x < y and direction == -1:
+                print('unsafe')
+                break #unsafe
+            if x > y and direction == 1:
+                print('unsafe')
+                break #unsafe
+        else:
+            # safe
+            print('safe')
+            result_a += 1
+
+    return result_a, result_a
+
 
 def do(reader, processor):
     result = 0
@@ -67,6 +106,7 @@ def do(reader, processor):
 
 funcs = {
     1: day01,
+    2: day02,
 }
 
 if __name__ == '__main__':
