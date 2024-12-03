@@ -161,6 +161,15 @@ def day03(reader):
         x, y = [int(i) for i in match[4:-1].split(",")]
         result_a += x*y
 
+    dos = corrupted_program.split(r'do()')
+    for todo in dos:
+        todo = todo.split(r"don't()")[0]
+        matches = re.findall(r'mul\(\d\d?\d?,\d\d?\d?\)', todo)
+        for match in matches:
+            print(match)
+            x, y = [int(i) for i in match[4:-1].split(",")]
+            result_b += x * y
+
     return result_a, result_b
 
 
