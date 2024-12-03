@@ -1,5 +1,6 @@
 import argparse
 import itertools
+import re
 from operator import countOf
 
 
@@ -147,6 +148,21 @@ def day02(reader):
 
     return result_a, result_b
 
+def day03(reader):
+    corrupted_program = ''.join(reader)
+    print(corrupted_program)
+
+    result_a = 0
+    result_b = 0
+
+    matches = re.findall(r'mul\(\d\d?\d?,\d\d?\d?\)', corrupted_program)
+    for match in matches:
+        print(match)
+        x, y = [int(i) for i in match[4:-1].split(",")]
+        result_a += x*y
+
+    return result_a, result_b
+
 
 def do(reader, processor):
     result = 0
@@ -161,6 +177,7 @@ def do(reader, processor):
 funcs = {
     1: day01,
     2: day02,
+    3: day03,
 }
 
 if __name__ == '__main__':
