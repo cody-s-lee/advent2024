@@ -255,6 +255,33 @@ def day04(reader):
 
         print(f'Found {x} forward and {y} backward')
 
+    # PART 2
+    # X-MAS
+    # For every A at i, j, look for M-M and S-S
+
+    num_lines = len(reader)
+    len_lines = len(reader[0])
+
+    for i in range(num_lines):
+        for j in range(len_lines):
+            if reader[i][j] == 'A':
+                print(f'Considering A at {i}, {j}')
+
+                # Skip edges
+                if i == 0 or j == 0 or i == num_lines-1 or j == len_lines-1:
+                    print(f'That A is on the edge')
+                    continue
+
+                x = reader[i-1][j-1] + reader[i+1][j-1] + reader[i+1][j+1] + reader[i-1][j+1]
+
+                print(f'Surrounding letters are {x}')
+                if (x == 'MMSS' or
+                        x == 'MSSM' or
+                        x == 'SSMM' or
+                        x == 'SMMS'):
+                    print(f'Found X-MAS at {i}, {j}')
+                    result_b += 1
+
     return result_a, result_b
 
 
