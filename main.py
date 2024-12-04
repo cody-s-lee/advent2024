@@ -1,12 +1,15 @@
 import argparse
 import itertools
 import re
+from collections import defaultdict
+from email.policy import default
 from operator import countOf
 
 
 def example():
     parser = argparse.ArgumentParser()
     parser.add_argument("day", type=int)
+    parser.add_argument("-x", "--example", action="store_true", help="Use example file")
     args = parser.parse_args()
 
     # Validation
@@ -16,10 +19,10 @@ def example():
 
     # Prepare
     func = funcs[args.day]
-    input_url = f'https://adventofcode.com/2024/day/{args.day}/input'
+    filename = f'day{args.day:02d}{"example" if args.example else ""}.txt'
 
     # Execute
-    with open(f'day{args.day:02d}.txt', 'r') as file:
+    with open(filename, 'r') as file:
         print(func(file.read().split("\n")))
 
 
@@ -172,6 +175,89 @@ def day03(reader):
 
     return result_a, result_b
 
+def day04(reader):
+    result_a, result_b = 0, 0
+
+    # Horizontal -
+    print('Horizontal')
+    for line in reader:
+        print(f'Evaluating {line}')
+
+        # Forward
+        x = len(re.findall('XMAS', line))
+        result_a += x
+
+        # Backward
+        y = len(re.findall('XMAS', line[::-1]))
+        result_a += y
+
+        print(f'Found {x} forward and {y} backward')
+
+    # Vertical |
+    print('Vertical')
+    verts = []
+    for i, line in enumerate(reader):
+        for j, c in enumerate(line):
+            if i == 0:
+                verts.append(c)
+            else:
+                verts[j] += c
+    for vert in verts:
+        print(f'Evaluating {vert}')
+
+        # Down
+        x = len(re.findall('XMAS', vert))
+        result_a += x
+
+        # Up
+        y = len(re.findall('XMAS', vert[::-1]))
+        result_a += y
+
+        print(f'Found {x} forward and {y} downward')
+
+    # Diagonal \
+    print('Diagonal \\')
+    diags = defaultdict(str)
+    for i, line in enumerate(reader):
+        for j, c in enumerate(line):
+            diags[i+j] += c
+
+    for diag in diags.values():
+        print(f'Evaluating {diag}')
+
+        # / Down
+        x = len(re.findall('XMAS', diag))
+        result_a += x
+
+        # / Up
+        y = len(re.findall('XMAS', diag[::-1]))
+        result_a += y
+
+        print(f'Found {x} forward and {y} backward')
+
+    # Diagonal /
+    print('Diagonal /')
+    sgiad = defaultdict(str)
+    for i, line in enumerate(reader):
+        for j, c in enumerate(line[::-1]):
+            sgiad[i+j] += c
+
+    for giad in sgiad.values():
+        print(f'Evaluating {giad}')
+
+        # \ Down
+        x = len(re.findall('XMAS', giad))
+        result_a += x
+
+        # \ Up
+        y = len(re.findall('XMAS', giad[::-1]))
+        result_a += y
+
+        print(f'Found {x} forward and {y} backward')
+
+    return result_a, result_b
+
+
 
 def do(reader, processor):
     result = 0
@@ -187,6 +273,7 @@ funcs = {
     1: day01,
     2: day02,
     3: day03,
+    4: day04,
 }
 
 if __name__ == '__main__':
