@@ -1,10 +1,9 @@
-from multiprocessing.managers import Value
-
-from args import get_args
 import itertools
 import re
 from collections import defaultdict
 from operator import countOf
+
+from args import get_args
 
 
 def main():
@@ -34,11 +33,13 @@ def with_lines(func):
 
     return wrapper
 
+
 def with_content(func):
     def wrapper(contents):
         return func(contents)
 
     return wrapper
+
 
 @with_lines
 def day01(lines):
@@ -73,11 +74,13 @@ def day01(lines):
 
     return result_a, result_b
 
+
 def pairwise(iterable):
     """s -> (s0, s1), (s1, s2), (s2, s3), ..."""
     a, b = itertools.tee(iterable)
     next(b, None)
     return zip(a, b)
+
 
 @with_lines
 def day02(lines):
@@ -92,19 +95,19 @@ def day02(lines):
 
         direction = 0
         for (x, y) in pairwise(levels):
-            if abs(x - y) <1 or abs(x-y) > 3:
+            if abs(x - y) < 1 or abs(x - y) > 3:
                 print('unsafe')
-                break # unsafe
+                break  # unsafe
 
             if direction == 0:
                 direction = 1 if x < y else -1
 
             if x < y and direction == -1:
                 print('unsafe')
-                break #unsafe
+                break  # unsafe
             if x > y and direction == 1:
                 print('unsafe')
-                break #unsafe
+                break  # unsafe
         else:
             # safe
             print('safe')
@@ -123,23 +126,23 @@ def day02(lines):
 
         direction = 0
         for (x, y) in pairwise(levels):
-            if abs(x - y) <1 or abs(x-y) > 3:
-                break # unsafe
+            if abs(x - y) < 1 or abs(x - y) > 3:
+                break  # unsafe
 
             if direction == 0:
                 direction = 1 if x < y else -1
 
             if x < y and direction == -1:
-                break #unsafe
+                break  # unsafe
             if x > y and direction == 1:
-                break #unsafe
+                break  # unsafe
         else:
             # safe
             is_safe = True
 
         if not is_safe:
             for j in range(len(levels)):
-                sub_levels = levels[:j] + levels[j+1:]
+                sub_levels = levels[:j] + levels[j + 1:]
                 direction = 0
                 for (x, y) in pairwise(sub_levels):
                     if abs(x - y) < 1 or abs(x - y) > 3:
@@ -163,8 +166,8 @@ def day02(lines):
         else:
             print('unsafe')
 
-
     return result_a, result_b
+
 
 @with_content
 def day03(content):
@@ -178,7 +181,7 @@ def day03(content):
     for match in matches:
         print(match)
         x, y = [int(i) for i in match[4:-1].split(",")]
-        result_a += x*y
+        result_a += x * y
 
     dos = corrupted_program.split(r'do()')
     for todo in dos:
@@ -190,6 +193,7 @@ def day03(content):
             result_b += x * y
 
     return result_a, result_b
+
 
 @with_lines
 def day04(lines):
@@ -237,7 +241,7 @@ def day04(lines):
     diags = defaultdict(str)
     for i, line in enumerate(lines):
         for j, c in enumerate(line):
-            diags[i+j] += c
+            diags[i + j] += c
 
     for diag in diags.values():
         print(f'Evaluating {diag}')
@@ -257,7 +261,7 @@ def day04(lines):
     sgiad = defaultdict(str)
     for i, line in enumerate(lines):
         for j, c in enumerate(line[::-1]):
-            sgiad[i+j] += c
+            sgiad[i + j] += c
 
     for giad in sgiad.values():
         print(f'Evaluating {giad}')
@@ -285,7 +289,7 @@ def day04(lines):
                 print(f'Considering A at {i}, {j}')
 
                 # Skip edges
-                if i == 0 or j == 0 or i == num_lines-1 or j == len_lines-1:
+                if i == 0 or j == 0 or i == num_lines - 1 or j == len_lines - 1:
                     print(f'That A is on the edge')
                     continue
 
@@ -300,6 +304,7 @@ def day04(lines):
                     result_b += 1
 
     return result_a, result_b
+
 
 class Page:
     def __init__(self, id: int, children: set):
@@ -316,6 +321,7 @@ class Page:
 
     def add_child(self, child):
         self._children.add(child)
+
 
 @with_content
 def day05(content):
@@ -346,6 +352,7 @@ def day05(content):
         index[id].add_child(index[to])
 
     # Process updates
+    incorrect_page_numbers_list = []
     for update in updates.split('\n'):
         if not update:
             continue
@@ -359,37 +366,68 @@ def day05(content):
             raise ValueError('Invalid pages')
 
         # For each pair of pages with each later page, check if there is a counter-rule
-        counter = False
-        for i, earlier in enumerate(page_numbers[:-1]):
-            for j, later in enumerate(page_numbers[i+1:]):
-                print(f'Checking {earlier} and {later}')
-
-                # Check if there's a path from later to earlier using bfs
-                path = []
-                queue = [(later, [later])]
-                visited = set()
-                while queue and not counter:
-                    current, current_path = queue.pop(0)
-                    visited.add(current)
-
-                    if current == earlier:
-                        print(f'Found a path from {later} to {earlier}: {current_path}')
-                        counter = True
-                        break
-
-                    for child in index[current].children:
-                        if child.id not in visited and child.id in page_numbers:
-                            queue.append((child.id, current_path + [child.id]))
-                if counter:
-                    break
-            if counter:
-                break
-
-        if not counter:
+        counter, _, _ = find_counter_example(index, page_numbers)
+        if counter:
+            print(f'Counter-rule found for {update}')
+            incorrect_page_numbers_list.append(page_numbers)
+        else:
             print(f'No counter-rule found for {update}')
-            result_a += page_numbers[len(page_numbers)//2]
+            result_a += page_numbers[len(page_numbers) // 2]
+
+    # PART 2
+    # For each list of page numbers in incorrect_page_numbers_list
+    for page_numbers in incorrect_page_numbers_list:
+        print(f'Fixing page numbers: {page_numbers}')
+
+        n = 0
+        max_tries = len(page_numbers) * len(page_numbers)
+        counter, i, j = find_counter_example(index, page_numbers)
+        while counter and n < max_tries:
+            page_numbers[j], page_numbers[i] = page_numbers[i], page_numbers[j]
+
+            counter, i, j = find_counter_example(index, page_numbers)
+            n += 1
+
+        print(f'Corrected page numbers: {page_numbers} after {n} tries')
+
+        result_b += page_numbers[len(page_numbers) // 2]
 
     return result_a, result_b
+
+
+def find_counter_example(index, page_numbers):
+    index = create_filtered_index(page_numbers, index)
+    # index_str = {k: [c.id for c in v.children] for k, v in index.items()}
+    # print(f'Using index {index_str} to fix {page_numbers}')
+    for i, earlier in enumerate(page_numbers[:-1]):
+        for j, later in enumerate(page_numbers[i + 1:]):
+            queue = [(later, [later])]
+            visited = set()
+            while queue:
+                current, current_path = queue.pop(0)
+                visited.add(current)
+
+                if current == earlier:
+                    return current_path, i, i + j + 1
+
+                for child in index[current].children:
+                    if child.id not in visited and child.id in page_numbers:
+                        queue.append((child.id, current_path + [child.id]))
+    return None, None, None
+
+
+def create_filtered_index(page_numbers, original_index):
+    filtered_index = {}
+    for page_number in page_numbers:
+        if page_number in original_index:
+            filtered_index[page_number] = Page(page_number, set())
+            for child in original_index[page_number].children:
+                if child.id in page_numbers:
+                    if child.id not in filtered_index:
+                        filtered_index[child.id] = Page(child.id, set())
+                    filtered_index[page_number].add_child(filtered_index[child.id])
+    return filtered_index
+
 
 def do(reader, processor):
     result = 0
@@ -400,6 +438,7 @@ def do(reader, processor):
         print(f'{i}: {line}')
         result += processor(line)
     return result
+
 
 funcs = {
     1: day01,
