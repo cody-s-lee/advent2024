@@ -1,16 +1,14 @@
-import argparse
+from multiprocessing.managers import Value
+
+from args import get_args
 import itertools
 import re
 from collections import defaultdict
-from email.policy import default
 from operator import countOf
 
 
-def example():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("day", type=int)
-    parser.add_argument("-x", "--example", action="store_true", help="Use example file")
-    args = parser.parse_args()
+def main():
+    args = get_args()
 
     # Validation
     if args.day not in funcs:
@@ -20,18 +18,34 @@ def example():
     # Prepare
     func = funcs[args.day]
     filename = f'day{args.day:02d}{"example" if args.example else ""}.txt'
+    expected_a, expected_b = ((args.answers if args.answers else []) + [0, 0])[0:2]
 
     # Execute
     with open(filename, 'r') as file:
-        print(func(file.read().split("\n")))
+        result_a, result_b = func(file.read())
+        print(f'Results: {result_a}, {result_b}')
+        if expected_a or expected_b:
+            print(f'Expected: {expected_a}, {expected_b}')
 
 
+def with_lines(func):
+    def wrapper(contents):
+        return func(contents.split("\n"))
 
-def day01(reader):
+    return wrapper
+
+def with_content(func):
+    def wrapper(contents):
+        return func(contents)
+
+    return wrapper
+
+@with_lines
+def day01(lines):
     result_a = 0
     lefts = []
     rights = []
-    for i, line in enumerate(reader):
+    for i, line in enumerate(lines):
         if len(line) == 0:
             continue
 
@@ -65,9 +79,10 @@ def pairwise(iterable):
     next(b, None)
     return zip(a, b)
 
-def day02(reader):
+@with_lines
+def day02(lines):
     result_a = 0
-    for i, line in enumerate(reader):
+    for i, line in enumerate(lines):
         if len(line) == 0:
             continue
 
@@ -96,7 +111,7 @@ def day02(reader):
             result_a += 1
 
     result_b = 0
-    for i, line in enumerate(reader):
+    for i, line in enumerate(lines):
         if len(line) == 0:
             continue
 
@@ -151,8 +166,9 @@ def day02(reader):
 
     return result_a, result_b
 
-def day03(reader):
-    corrupted_program = ''.join(reader)
+@with_content
+def day03(content):
+    corrupted_program = content
     print(corrupted_program)
 
     result_a = 0
@@ -175,12 +191,13 @@ def day03(reader):
 
     return result_a, result_b
 
-def day04(reader):
+@with_lines
+def day04(lines):
     result_a, result_b = 0, 0
 
     # Horizontal -
     print('Horizontal')
-    for line in reader:
+    for line in lines:
         print(f'Evaluating {line}')
 
         # Forward
@@ -196,7 +213,7 @@ def day04(reader):
     # Vertical |
     print('Vertical')
     verts = []
-    for i, line in enumerate(reader):
+    for i, line in enumerate(lines):
         for j, c in enumerate(line):
             if i == 0:
                 verts.append(c)
@@ -218,7 +235,7 @@ def day04(reader):
     # Diagonal \
     print('Diagonal \\')
     diags = defaultdict(str)
-    for i, line in enumerate(reader):
+    for i, line in enumerate(lines):
         for j, c in enumerate(line):
             diags[i+j] += c
 
@@ -238,7 +255,7 @@ def day04(reader):
     # Diagonal /
     print('Diagonal /')
     sgiad = defaultdict(str)
-    for i, line in enumerate(reader):
+    for i, line in enumerate(lines):
         for j, c in enumerate(line[::-1]):
             sgiad[i+j] += c
 
@@ -259,12 +276,12 @@ def day04(reader):
     # X-MAS
     # For every A at i, j, look for M-M and S-S
 
-    num_lines = len(reader)
-    len_lines = len(reader[0])
+    num_lines = len(lines)
+    len_lines = len(lines[0])
 
     for i in range(num_lines):
         for j in range(len_lines):
-            if reader[i][j] == 'A':
+            if lines[i][j] == 'A':
                 print(f'Considering A at {i}, {j}')
 
                 # Skip edges
@@ -272,7 +289,7 @@ def day04(reader):
                     print(f'That A is on the edge')
                     continue
 
-                x = reader[i-1][j-1] + reader[i+1][j-1] + reader[i+1][j+1] + reader[i-1][j+1]
+                x = lines[i - 1][j - 1] + lines[i + 1][j - 1] + lines[i + 1][j + 1] + lines[i - 1][j + 1]
 
                 print(f'Surrounding letters are {x}')
                 if (x == 'MMSS' or
@@ -284,7 +301,95 @@ def day04(reader):
 
     return result_a, result_b
 
+class Page:
+    def __init__(self, id: int, children: set):
+        self._id = id
+        self._children = children
 
+    @property
+    def id(self):
+        return self._id
+
+    @property
+    def children(self):
+        return self._children
+
+    def add_child(self, child):
+        self._children.add(child)
+
+@with_content
+def day05(content):
+    result_a = 0
+    result_b = 0
+
+    rules, updates = (p.rstrip(' \n') for p in content.split('\n\n', maxsplit=1))
+
+    print(f'Rules:\n{rules}')
+    print('---------------')
+    print(f'Updates:\n{updates}')
+    print('---------------')
+
+    # Create page index
+    index = dict()
+    for rule in sorted(rules.split('\n')):
+        if not rule:
+            continue
+
+        print(f'Processing rule: {rule}')
+        id, to = [int(p) for p in rule.split('|', maxsplit=1)]
+
+        if id not in index:
+            index[id] = Page(id, set())
+        if to not in index:
+            index[to] = Page(to, set())
+
+        index[id].add_child(index[to])
+
+    # Process updates
+    for update in updates.split('\n'):
+        if not update:
+            continue
+
+        print(f'Processing update: {update}')
+        page_numbers = [int(p) for p in update.split(',')]
+
+        # if the length of the pages is even, it's invalid
+        if len(page_numbers) % 2 == 0:
+            print(f'Invalid pages: {page_numbers}')
+            raise ValueError('Invalid pages')
+
+        # For each pair of pages with each later page, check if there is a counter-rule
+        counter = False
+        for i, earlier in enumerate(page_numbers[:-1]):
+            for j, later in enumerate(page_numbers[i+1:]):
+                print(f'Checking {earlier} and {later}')
+
+                # Check if there's a path from later to earlier using bfs
+                path = []
+                queue = [(later, [later])]
+                visited = set()
+                while queue and not counter:
+                    current, current_path = queue.pop(0)
+                    visited.add(current)
+
+                    if current == earlier:
+                        print(f'Found a path from {later} to {earlier}: {current_path}')
+                        counter = True
+                        break
+
+                    for child in index[current].children:
+                        if child.id not in visited and child.id in page_numbers:
+                            queue.append((child.id, current_path + [child.id]))
+                if counter:
+                    break
+            if counter:
+                break
+
+        if not counter:
+            print(f'No counter-rule found for {update}')
+            result_a += page_numbers[len(page_numbers)//2]
+
+    return result_a, result_b
 
 def do(reader, processor):
     result = 0
@@ -301,7 +406,8 @@ funcs = {
     2: day02,
     3: day03,
     4: day04,
+    5: day05,
 }
 
 if __name__ == '__main__':
-    example()
+    main()
