@@ -15,7 +15,7 @@ from utils import Point, add_points, with_lines
 # Brute: 1723, Smart: 0
 # Results: 4647, 1723
 # Day 6 results: (4647, 1723)
-# python main.py 6  62.01s user 0.16s system 99% cpu 1:02.37 total
+# python main.py 6  62.01s user 0.16s system 99% cpu 1:02.37 total;.
 
 
 EMPTY = 0
@@ -89,8 +89,10 @@ def day06(lines):
     pot_locs = set()
     obs_locs_smart = set()
     n = 0
-    for loc in grid:
-        ### Try every grid location
+    # for loc in grid:
+    #     ### Try every grid location
+    for loc in [s.loc for s in guard_states]:
+        ### Try every grid location the guard initially went through
         n += 1
         if loc != guard_state.loc and grid[loc] == EMPTY:
             new_grid = grid.copy()
