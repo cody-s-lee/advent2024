@@ -2,6 +2,22 @@ from collections import namedtuple
 
 from utils import Point, add_points, with_lines
 
+### Notes:
+## "Smart"
+# [  9:48AM ]  [ cody@Nitrogen:~/PycharmProjects/advent2024(main✗) ]
+#  $ time python main.py 6
+# Results: 4647, 1723
+# Day 6 results: (4647, 1723)
+# python main.py 6  89.85s user 0.45s system 99% cpu 1:31.18 total
+## "Brute"
+# [  9:50AM ]  [ cody@Nitrogen:~/PycharmProjects/advent2024(main✗) ]
+#  $ time python main.py 6
+# Brute: 1723, Smart: 0
+# Results: 4647, 1723
+# Day 6 results: (4647, 1723)
+# python main.py 6  62.01s user 0.16s system 99% cpu 1:02.37 total
+
+
 EMPTY = 0
 WALL = -1
 
@@ -69,44 +85,44 @@ def day06(lines):
     guard_states, _ = patrol(grid, guard_state)
     result_a = len(set([s.loc for s in guard_states]))
 
-    # obs_locs_brute = set()
+    obs_locs_brute = set()
     pot_locs = set()
     obs_locs_smart = set()
-    # n = 0
+    n = 0
     for loc in grid:
         ### Try every grid location
-        # n += 1
-        # if loc != guard_state.loc and grid[loc] == EMPTY:
-        #     new_grid = grid.copy()
-        #     new_grid[loc] = WALL
-        #
-        #     _, escaped = patrol(new_grid, guard_state)
-        #     if not escaped:
-        #         obs_locs_brute.add(loc)
+        n += 1
+        if loc != guard_state.loc and grid[loc] == EMPTY:
+            new_grid = grid.copy()
+            new_grid[loc] = WALL
 
-        ### Look if this completes a loop
-        for f, v in VECTOR.items():
-            pos = add_points(loc, v)
-            if pos in grid and pos != guard_state.loc:
-                # find if there's a loop from here
-                test_guard = GuardState(pos, PREV[f])
-                test_grid = grid.copy()
-                test_grid[loc] = WALL
+            _, escaped = patrol(new_grid, guard_state)
+            if not escaped:
+                obs_locs_brute.add(loc)
 
-                _, escaped = patrol(test_grid, test_guard)
-                if not escaped:
-                    pot_locs.add(loc)
+    #     ### Look if this completes a loop
+    #     for f, v in VECTOR.items():
+    #         pos = add_points(loc, v)
+    #         if pos in grid and pos != guard_state.loc:
+    #             # find if there's a loop from here
+    #             test_guard = GuardState(pos, PREV[f])
+    #             test_grid = grid.copy()
+    #             test_grid[loc] = WALL
+    #
+    #             _, escaped = patrol(test_grid, test_guard)
+    #             if not escaped:
+    #                 pot_locs.add(loc)
+    #
+    # for loc in pot_locs:
+    #     new_grid = grid.copy()
+    #     new_grid[loc] = WALL
+    #     _, escaped = patrol(new_grid, guard_state)
+    #     if not escaped:
+    #         obs_locs_smart.add(loc)
 
-    for loc in pot_locs:
-        new_grid = grid.copy()
-        new_grid[loc] = WALL
-        _, escaped = patrol(new_grid, guard_state)
-        if not escaped:
-            obs_locs_smart.add(loc)
+    print(f'Brute: {len(obs_locs_brute)}, Smart: {len(obs_locs_smart)}')
 
-    # print(f'Brute: {len(obs_locs_brute)}, Smart: {len(obs_locs_smart)}')
-
-    result_b = len(obs_locs_smart)
+    result_b = len(obs_locs_brute)
 
     return result_a, result_b
 
