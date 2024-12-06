@@ -1,4 +1,5 @@
 import argparse
+from collections import namedtuple
 
 
 def get_args():
@@ -11,13 +12,20 @@ def get_args():
 
 def with_lines(func):
     def wrapper(contents):
-        return func(contents.split("\n"))
+        return func(contents.rstrip(' \n').split("\n"))
 
     return wrapper
 
 
 def with_content(func):
     def wrapper(contents):
-        return func(contents)
+        return func(contents.rstrip(' \n'))
 
     return wrapper
+
+
+Point = namedtuple('Point', ['x', 'y'])
+
+
+def add_points(p1, p2):
+    return Point(p1.x + p2.x, p1.y + p2.y)

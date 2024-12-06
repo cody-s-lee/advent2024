@@ -96,24 +96,6 @@ def day05(content):
         pages = [index[p] for p in page_numbers]
         sorted_page_numbers = [p.id for p in sorted(pages, key=cmp_to_key(cmp_pages))]
         print(f'Maybe could be sorted as: {sorted_page_numbers}')
-        #
-        # n = 0
-        # max_tries = len(page_numbers) * len(page_numbers)
-        # counter, i, j = find_counter_example(index, page_numbers)
-        # while counter and n < max_tries:
-        #     page_numbers[j], page_numbers[i] = page_numbers[i], page_numbers[j]
-        #
-        #     counter, i, j = find_counter_example(index, page_numbers)
-        #     n += 1
-        #
-        # print(f'Corrected page numbers: {page_numbers} after {n} tries')
-        #
-        # if page_numbers[len(page_numbers) // 2] != sorted_page_numbers[len(sorted_page_numbers) // 2]:
-        #     print(
-        #         f'Got {page_numbers[len(page_numbers) // 2]} instead of {sorted_page_numbers[len(sorted_page_numbers) // 2]} for original {original_page_numbers}')
-        #     raise
-        #
-        # result_b += page_numbers[len(page_numbers) // 2]
         result_b += sorted_page_numbers[len(page_numbers) // 2]
 
     return result_a, result_b
@@ -121,8 +103,6 @@ def day05(content):
 
 def find_counter_example(index, page_numbers):
     index = create_filtered_index(page_numbers, index)
-    # index_str = {k: [c.id for c in v.children] for k, v in index.items()}
-    # print(f'Using index {index_str} to fix {page_numbers}')
     for i, earlier in enumerate(page_numbers[:-1]):
         for j, later in enumerate(page_numbers[i + 1:]):
             queue = [(later, [later])]
