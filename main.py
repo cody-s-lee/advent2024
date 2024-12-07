@@ -4,6 +4,7 @@ from day03 import day03
 from day04 import day04
 from day05 import day05
 from day06 import day06
+from day07 import day07
 from utils import get_args
 
 
@@ -53,6 +54,7 @@ funcs = {
     4: day04,
     5: day05,
     6: day06,
+    7: day07,
 }
 
 if __name__ == '__main__':

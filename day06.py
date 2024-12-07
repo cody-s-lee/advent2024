@@ -91,7 +91,7 @@ def day06(lines):
     n = 0
     # for loc in grid:
     #     ### Try every grid location
-    for loc in [s.loc for s in guard_states]:
+    for loc in {s.loc for s in guard_states}:
         ### Try every grid location the guard initially went through
         n += 1
         if loc != guard_state.loc and grid[loc] == EMPTY:
