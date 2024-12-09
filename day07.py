@@ -9,7 +9,7 @@ class OpInst:
 
 ADD = OpInst('+', lambda a, b: a + b)
 MULT = OpInst('*', lambda a, b: a * b)
-OPERATORS = [ADD, MULT]
+CONCAT = OpInst('||', lambda a, b: int(str(a) + str(b)))
 
 
 @with_lines
@@ -39,9 +39,29 @@ def day07(lines):
                 break
 
     # Part 2
-    # I accidentally deleted my solution :/
+    for line in lines:
+        target, operands = parse(line)
 
-    return result_a, 106016735664498
+        op = operands.pop(0)
+        leaves = [Node(op, None, None)]
+
+        while operands:
+            op = operands.pop(0)
+            new_leaves = []
+            while leaves:
+                leaf = leaves.pop(0)
+                new_add = Node(op, leaf, ADD)
+                new_mult = Node(op, leaf, MULT)
+                new_concat = Node(op, leaf, CONCAT)
+                new_leaves.extend([new_add, new_mult, new_concat])
+            leaves = new_leaves
+
+        for leaf in leaves:
+            if leaf.total() == target:
+                result_b += target
+                break
+
+    return result_a, result_b
 
 
 class Node:
