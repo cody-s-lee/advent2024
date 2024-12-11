@@ -1,59 +1,132 @@
+import re
+from collections import defaultdict
+
 from utils import with_content
+
+Z = re.compile(r'\b(0)\b')
+E = re.compile(r'\b((?:\d\d)+)\b')
+O = re.compile(r'\b([1-9](?:\d\d)*)\b')
+C = re.compile(r'x')
+
+
+def evenrepl(match):
+    s = match.group(1)
+    m, n = s[:len(s) // 2], s[len(s) // 2:].lstrip('0')
+    m = '0' if not m else m
+    n = '0' if not n else n
+    return f'x{m}  x{n}'
 
 
 @with_content
-def day11(content):
-    hair = Node(0, parse(content))
+def day11re(content):
+    content = content.replace(' ', '  ')
 
-    print(Node.str(hair.n))
+    # 123456 385 0
+
+    # apply evens rule
+    # x123 x456 385 0
+
+    # apply odds rule
+    # x123 x456 385*2024 0
+
+    # apply zeros rule
+    # x123 x456 385*2024 1
+
+    # commit evens rule             # apply simultaneously
+    # 123 456 385*2024 1            # 123 456 385*2024 1
 
     for _ in range(25):
-        prev, curr = hair, hair.n
-        while curr:
+        print(f'[{_}] {len(content)}')
 
-            if curr.x == 0:
-                curr.x = 1
-            elif len(str(curr.x)) % 2 == 0:
-                s = str(curr.x)
-                l, r = int(s[:len(s) // 2]), int(s[len(s) // 2:])
+        # apply evens rule
+        content = E.sub(evenrepl, content)
 
-                p = Node(r, curr.n)
-                o = Node(l, p)
+        # apply odds rule
+        for match in reversed(list(O.finditer(content))):
+            # print(match)
+            content = content[:match.start(1)] + str(2024 * int(match.group(1))) + content[match.end(1):]
+        pass
 
-                prev.n = o
-                curr = p
-            else:
-                curr.x = curr.x * 2024
+        # apply zeros rule
+        content = Z.sub(' 1 ', content)
 
-            prev, curr = curr, curr.n
+        # commit evens rule
+        content = C.sub('', content)
 
-        # sz = Node.size(hair.n)
-        # st = Node.str(hair.n)
-        # print(f'{_}: {sz}, {st}')
-
-    result_a = Node.size(hair.n)
+    result_a = len(content.split('  '))
 
     for _ in range(50):
-        prev, curr = hair, hair.n
-        while curr:
+        print(f'[{_ + 25}] {len(content)}')
 
-            if curr.x == 0:
-                curr.x = 1
-            elif len(str(curr.x)) % 2 == 0:
-                s = str(curr.x)
-                l, r = int(s[:len(s) // 2]), int(s[len(s) // 2:])
+        # apply evens rule
+        content = E.sub(evenrepl, content)
 
-                p = Node(r, curr.n)
-                o = Node(l, p)
+        # apply odds rule
+        for match in reversed(list(O.finditer(content))):
+            # print(match)
+            content = content[:match.start(1)] + str(2024 * int(match.group(1))) + content[match.end(1):]
+        pass
 
-                prev.n = o
-                curr = p
+        # apply zeros rule
+        content = Z.sub(' 1 ', content)
+
+        # commit evens rule
+        content = C.sub('', content)
+
+    result_b = len(content.split('  '))
+
+    return result_a, result_b
+
+
+@with_content
+def day11dict(content):
+    stones = parsedict(content)
+
+    for _ in range(25):
+        updates: dict[int, int] = defaultdict(int)
+        for stone, count in stones.items():
+            if stone == 0:
+                updates[1] += count
             else:
-                curr.x = curr.x * 2024
+                s = str(stone)
+                if len(s) % 2 == 0:
+                    updates[int(s[:len(s) // 2])] += count
+                    updates[int(s[len(s) // 2:])] += count
+                else:
+                    updates[stone * 2024] += count
 
-            prev, curr = curr, curr.n
+        stones = updates
+    result_a = sum(c for c in stones.values())
 
-    result_b = Node.size(hair.n)
+    for _ in range(50):
+        updates: dict[int, int] = defaultdict(int)
+        for stone, count in stones.items():
+            if stone == 0:
+                updates[1] += count
+            else:
+                s = str(stone)
+                if len(s) % 2 == 0:
+                    updates[int(s[:len(s) // 2])] += count
+                    updates[int(s[len(s) // 2:])] += count
+                else:
+                    updates[stone * 2024] += count
+
+        stones = updates
+    result_b = sum(c for c in stones.values())
+
+    return result_a, result_b
+
+
+def parsedict(content) -> dict[int, int]:
+    return {int(x): 1 for x in content.split(" ")}
+
+
+@with_content
+def day11ll(content):
+    l = [int(x) for x in content.split(' ')]
+
+    result_a = sum(len(expand(x, 25)) for x in l)
+    result_b = sum(len(expand(x, 75)) for x in l)
 
     return result_a, result_b
 
@@ -130,3 +203,6 @@ def expand(x: int, n: int) -> list:
         EXPANSIONS[(x, i)] = l
 
     return l
+
+
+day11 = day11dict
