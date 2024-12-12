@@ -27,7 +27,7 @@ def day12(lines):
                     queue.append(n)
 
     result_a = sum(price(r) for r in regions)
-    result_b = sum(area(r) * sides(r) for r in regions)
+    result_b = sum(bulk_price(r) for r in regions)
 
     for r in regions:
         p = one_of(r)
@@ -36,15 +36,19 @@ def day12(lines):
     return result_a, result_b
 
 
-def price(region: set[Point]) -> int:
+def bulk_price(region: Region) -> int:
+    return area(region) * sides(region)
+
+
+def price(region: Region) -> int:
     return area(region) * perimeter(region)
 
 
-def area(region: set[Point]) -> int:
+def area(region: Region) -> int:
     return len(region)
 
 
-def perimeter(region: set[Point]) -> int:
+def perimeter(region: Region) -> int:
     return sum(sum(1 for n in neighbors(p) if n not in region) for p in region)
 
 
@@ -56,7 +60,7 @@ NEXT_DIRECTION = {
 }
 
 
-def sides(region: set[Point]) -> int:
+def sides(region: Region) -> int:
     # like perimeter but if my neighbor to the E has a N fence, my N fence doesn't count
     # For N fence -> E neighbor, for E fence -> S neighbor, for S fence -> W neighbor, for W fence -> N neighbor
     num_sides = 0
