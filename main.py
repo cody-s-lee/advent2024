@@ -9,6 +9,7 @@ from day08 import day08
 from day09 import day09
 from day10 import day10
 from day11 import day11
+from day12 import day12
 from utils import get_args
 
 
@@ -63,6 +64,7 @@ funcs = {
     9: day09,
     10: day10,
     11: day11,
+    12: day12,
 }
 
 if __name__ == '__main__':

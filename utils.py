@@ -25,7 +25,23 @@ def with_content(func):
 
 
 Point = namedtuple('Point', ['x', 'y'])
+N = Point(0, -1)
+E = Point(1, 0)
+S = Point(0, 1)
+W = Point(-1, 0)
+CARDINAL_DIRECTIONS = [N, E, S, W]
 
 
 def add_points(p1, p2):
     return Point(p1.x + p2.x, p1.y + p2.y)
+
+
+def neighbors(p: Point) -> list[Point]:
+    return [Point(p.x + 1, p.y), Point(p.x - 1, p.y), Point(p.x, p.y + 1), Point(p.x, p.y - 1)]
+
+
+def one_of(s: set):
+    e = None
+    for e in s:
+        break
+    return e
