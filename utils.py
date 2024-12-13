@@ -1,5 +1,5 @@
 import argparse
-from collections import namedtuple
+import typing
 
 
 def get_args():
@@ -24,7 +24,20 @@ def with_content(func):
     return wrapper
 
 
-Point = namedtuple('Point', ['x', 'y'])
+class Point(typing.NamedTuple):
+    x: int
+    y: int
+
+    def __add__(self, other):
+        return Point(self.x + other.x, self.y + other.y)
+
+    def __sub__(self, other):
+        return Point(self.x - other.x, self.y - other.y)
+
+    def mul_scalar(self, scalar):
+        return Point(self.x * scalar, self.y * scalar)
+
+
 N = Point(0, -1)
 E = Point(1, 0)
 S = Point(0, 1)
