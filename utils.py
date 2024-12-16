@@ -10,6 +10,10 @@ def get_args():
     return parser.parse_args()
 
 
+def is_example():
+    return get_args().example
+
+
 def with_lines(func):
     def wrapper(contents):
         return func(contents.rstrip(' \n').split("\n"))
@@ -43,14 +47,18 @@ E = Point(1, 0)
 S = Point(0, 1)
 W = Point(-1, 0)
 CARDINAL_DIRECTIONS = [N, E, S, W]
+ORDINAL_DIRECTIONS = [N + E, S + E, S + W, N + W]
+COMPASS_DIRECTIONS = CARDINAL_DIRECTIONS + ORDINAL_DIRECTIONS
 
 
 def add_points(p1, p2):
     return Point(p1.x + p2.x, p1.y + p2.y)
 
 
-def neighbors(p: Point) -> list[Point]:
-    return [Point(p.x + 1, p.y), Point(p.x - 1, p.y), Point(p.x, p.y + 1), Point(p.x, p.y - 1)]
+def neighbors(p: Point, directions=None) -> list[Point]:
+    if directions is None:
+        directions = CARDINAL_DIRECTIONS
+    return [p + d for d in directions]
 
 
 def one_of(s: set):

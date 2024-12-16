@@ -12,22 +12,25 @@ MACHINE_RE = re.compile(r'^Button A: X\+(\d+), Y\+(\d+)\nButton B: X\+(\d+), Y\+
 def day13(content):
     machines = parse(content)
 
+    result_a = best_cost(machines)
+
+    for machine in machines:
+        machine.prize += Point(10000000000000, 10000000000000)
+
+    result_b = best_cost(machines)
+
+    return result_a, result_b
+
+
+def best_cost(machines):
     total = 0
-    n = 0
     for machine in machines:
         solution = machine.solve()
-
-        # print('-' * 20)
-        # print()
-        # print(f'Prize: {machine.prize}, A: {machine.a}, B: {machine.b}')
-        # print(f'Solution: {solution}')
 
         if solution is not None:
             num_a, num_b = solution
             total += 3 * num_a + num_b
-            n = n + 1
-
-    return total, 0
+    return total
 
 
 class Machine:
