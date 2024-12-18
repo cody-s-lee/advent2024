@@ -1,5 +1,6 @@
 import argparse
 import typing
+from enum import Enum
 
 
 def get_args():
@@ -49,6 +50,28 @@ W = Point(-1, 0)
 CARDINAL_DIRECTIONS = [N, E, S, W]
 ORDINAL_DIRECTIONS = [N + E, S + E, S + W, N + W]
 COMPASS_DIRECTIONS = CARDINAL_DIRECTIONS + ORDINAL_DIRECTIONS
+
+
+class Direction(Enum):
+    NORTH = N = N
+    EAST = E = E
+    SOUTH = S = S
+    WEST = W = W
+
+
+NEXT_DIRECTION = {
+    N: E,
+    E: S,
+    S: W,
+    W: N,
+}
+
+PREV_DIRECTION = {
+    N: W,
+    E: N,
+    S: E,
+    W: S,
+}
 
 
 def add_points(p1, p2):
