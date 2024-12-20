@@ -18,6 +18,11 @@ from day17 import day17
 from day18 import day18
 from day19 import day19
 from day20 import day20
+from day21 import day21
+from day22 import day22
+from day23 import day23
+from day24 import day24
+from day25 import day25
 from utils import get_args
 
 
@@ -81,6 +86,11 @@ funcs = {
     18: day18,
     19: day19,
     20: day20,
+    21: day21,
+    22: day22,
+    23: day23,
+    24: day24,
+    25: day25,
 }
 
 if __name__ == '__main__':
