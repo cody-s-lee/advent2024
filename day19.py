@@ -35,12 +35,7 @@ def valid(towels, pattern) -> bool:
         return True
 
     # if any of the towels prefix the pattern then we're good if the rest of the pattern is valid
-    for towel in towels:
-        if pattern.startswith(towel):
-            if valid(towels, pattern[len(towel):]):
-                return True
-
-    return False
+    return any(valid(towels, pattern[len(towel):]) for towel in towels if pattern.startswith(towel))
 
 
 def count_arrangements(towels, patterns) -> int:
