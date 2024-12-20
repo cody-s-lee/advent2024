@@ -17,34 +17,48 @@ def day20(lines: list[str]) -> tuple[int, int]:
 
     base = dist_src_x[dst]
 
-    shortcut_counter, shortcuts = make_shortcuts(base, dist_src_x, dist_x_dst, points, 2)
+    shortcut_counter_two, shortcuts_two = make_shortcuts(base, dist_src_x, dist_x_dst, points, 2)
+    shortcut_counter_twenty, shortcuts_twenty = make_shortcuts(base, dist_src_x, dist_x_dst, points, 20)
 
-    print(f'Num of shortcuts: {len(shortcuts)}')
+    print(f'Num of shortcuts: {len(shortcuts_two)}, {len(shortcuts_twenty)}')
     print(f'Base: {base}')
 
     if is_example():
-        for i in sorted(shortcut_counter.keys()):
-            if shortcut_counter[i] > 0:
-                print(f'{i}: {shortcut_counter[i]}')
+        print('Two:')
+        for i in sorted(shortcut_counter_two.keys()):
+            if shortcut_counter_two[i] > 0:
+                print(f'{i}: {shortcut_counter_two[i]}')
+
+        print('Twenty:')
+        for i in sorted(shortcut_counter_twenty.keys()):
+            if i < 50:
+                continue
+            if shortcut_counter_twenty[i] > 0:
+                print(f'{i}: {shortcut_counter_twenty[i]}')
 
     result_a = 0
-    for (p, q), d in shortcuts.items():
+    for (p, q), d in shortcuts_two.items():
         # print(f'{p} -> {q} ({d})')
         if d + 100 <= base:
             # print(f'Found good shortcut! {p} -> {q} ({d})')
             result_a += 1
 
-    return result_a, 0
+    result_b = 0
+    for (p, q), d in shortcuts_twenty.items():
+        # print(f'{p} -> {q} ({d})')
+        if d + 100 <= base:
+            # print(f'Found good shortcut! {p} -> {q} ({d})')
+            result_b += 1
+
+    return result_a, result_b
 
 
 def make_shortcuts(base, dist_src_x, dist_x_dst, points, cheat_length: int):
     shortcuts: [dict[tuple[Point, Point], int]] = dict()  # (p, q) -> dist
     shortcut_counter = defaultdict(int)
-    # for every pair of points p,q surrounding a wall
-    # if dist(src, p) + 2 + dist(q, dst) <= base it's a good shortcut
     for p in points:
         for q in [q for q in p.within_dist(cheat_length) if q in points and p.dist(q) > 1]:
-            dist = dist_src_x[p] + cheat_length + dist_x_dst[q]
+            dist = dist_src_x[p] + p.dist(q) + dist_x_dst[q]
             if dist < base:
                 # print(f'Found shortcut: {p} -> {q}')
                 shortcuts[(p, q)] = dist
