@@ -43,7 +43,7 @@ def make_shortcuts(base, dist_src_x, dist_x_dst, points, cheat_length: int):
     # for every pair of points p,q surrounding a wall
     # if dist(src, p) + 2 + dist(q, dst) <= base it's a good shortcut
     for p in points:
-        for q in [q for q in p.at_dist(cheat_length) if q in points]:
+        for q in [q for q in p.within_dist(cheat_length) if q in points and p.dist(q) > 1]:
             dist = dist_src_x[p] + cheat_length + dist_x_dst[q]
             if dist < base:
                 # print(f'Found shortcut: {p} -> {q}')

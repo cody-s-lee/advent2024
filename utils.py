@@ -45,12 +45,11 @@ class Point(typing.NamedTuple):
     def dist(self, other):
         return abs(self.x - other.x) + abs(self.y - other.y)
 
-    def at_dist(self, dist):
+    def within_dist(self, dist):
         for x in range(-dist, dist + 1):
-            y = dist - abs(x)
-            yield Point(self.x + x, self.y + y)
-            if y != 0:
-                yield Point(self.x + x, self.y - y)
+            for y in range(-dist, dist + 1):
+                if abs(x) + abs(y) <= dist:
+                    yield Point(self.x + x, self.y + y)
 
 
 N = Point(0, -1)
