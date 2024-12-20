@@ -42,6 +42,16 @@ class Point(typing.NamedTuple):
     def mul_scalar(self, scalar):
         return Point(self.x * scalar, self.y * scalar)
 
+    def dist(self, other):
+        return abs(self.x - other.x) + abs(self.y - other.y)
+
+    def at_dist(self, dist):
+        for x in range(-dist, dist + 1):
+            y = dist - abs(x)
+            yield Point(self.x + x, self.y + y)
+            if y != 0:
+                yield Point(self.x + x, self.y - y)
+
 
 N = Point(0, -1)
 E = Point(1, 0)
