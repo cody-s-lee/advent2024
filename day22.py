@@ -28,9 +28,9 @@ def sx(args):
     return result
 
 
-def ix(args: tuple[int, list[int]], num_sequences: int) -> list[tuple[tuple[int, tuple[int, ...]], int]]:
+def ix(args: tuple[int, list[int]], total: int) -> list[tuple[tuple[int, tuple[int, ...]], int]]:
     i, seq = args
-    
+
     _insets = insets(seq)  # sequence -> inset tuple, value
     results = []
     for inset, value in _insets:
@@ -39,7 +39,7 @@ def ix(args: tuple[int, list[int]], num_sequences: int) -> list[tuple[tuple[int,
 
     lock.acquire()
     done.value += 1
-    print(f'\rProcessed {done.value}/{num_sequences} entries', end='')
+    print(f'\rProcessed {done.value}/{total} entries', end='')
     lock.release()
 
     return results  # list[ ( (i,inset), value ) ]
@@ -95,8 +95,9 @@ def day22(lines):
     result_a = sum(s[2000] for s in sequences.values())
 
     print(f'Processing insets...')
+    doing.value = 0
     done.value = 0
-    inset_map_entry_lists = pool.imap_unordered(partial(ix, num_sequences=len(sequences)), sequences.items())
+    inset_map_entry_lists = pool.imap_unordered(partial(ix, total=len(sequences)), sequences.items())
     inset_map = dict()
     for entry_list in inset_map_entry_lists:
         for key, value in entry_list:
