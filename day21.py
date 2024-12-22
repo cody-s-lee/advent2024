@@ -6,26 +6,210 @@ from utils import Point, with_lines
 
 @with_lines
 def day21(lines):
-    # for line in lines:
-    line = lines[0]
-    line = line.split(':')[0]
-    print(f'line: {line}')
-    line = 'A' + line
+    result_a = part_n(lines, 2)
+    print(result_a)
 
-    # Move robot 2 from A to line[0]
-    # For each move in robot 2 moves move robot 1 from A to robot 2 move
-    # Repeat for each move robot 2 makes
+    result_b = part_n(lines, 25)
+    # result_b = 0
 
-    # Make the robot 2 layer
-    robot_2_paths: set[str] = {''}
+    # 106038 is too low for result_a
+    return result_a, result_b
+
+
+def part1x(lines):
+    result = 0
+    for line in lines:
+        line = line.split(':')[0]
+        # line = '179A'
+        # print(f'line: {line}')
+        line = 'A' + line
+
+        # Make the robot 2 layer
+        robot_2_paths: set[str] = {''}
+        for src, dst in itertools.pairwise(line):
+            # print(f'{src} -> {dst}')
+            new_paths = set()
+            for seq in all_moves(NUMPAD_TO_POINT[dst], src=NUMPAD_TO_POINT[src], is_dpad=False):
+                for path in robot_2_paths:
+                    new_paths.add(path + seq + 'A')
+            robot_2_paths = new_paths
+
+        robot_1_paths = redirect(robot_2_paths)
+
+        manual_paths: set[str] = set()
+        for m_line in robot_1_paths:
+            m_line = 'A' + m_line
+            base_paths: set[str] = {''}
+            for src, dst in itertools.pairwise(m_line):
+                # print(f'{src} -> {dst}')
+                new_paths = set()
+                for seq in sorted(all_moves(DPAD_TO_POINT[dst], src=DPAD_TO_POINT[src]), key=len)[0:1]:
+                    for path in sorted(base_paths, key=len)[0:1]:
+                        new_paths.add(path + seq + 'A')
+                base_paths = new_paths
+            for path in base_paths:
+                manual_paths.add(path)
+
+        # for path in manual_paths:
+        #     print(path)
+        shortest_path = min(manual_paths, key=len)
+        print(f'{line[1:]}: {len(shortest_path)} -> {shortest_path}')
+
+        result += len(shortest_path) * int(line[1:-1], 10)
+    return result
+
+
+def part2x(lines):
+    result = 0
+    for line in lines:
+        line = line.split(':')[0]
+        # line = '179A'
+        # print(f'line: {line}')
+        line = 'A' + line
+
+        # Make the robot 2 layer
+        paths: set[str] = {''}
+        for src, dst in itertools.pairwise(line):
+            # print(f'{src} -> {dst}')
+            new_paths = set()
+            for seq in all_moves(NUMPAD_TO_POINT[dst], src=NUMPAD_TO_POINT[src], is_dpad=False):
+                for path in paths:
+                    new_paths.add(path + seq + 'A')
+            paths = new_paths
+
+        paths = redirect(paths)
+        paths = redirect(paths)
+        paths = redirect(paths)
+        paths = redirect(paths)
+        paths = redirect(paths)
+        paths = redirect(paths)
+        paths = redirect(paths)
+        paths = redirect(paths)
+        paths = redirect(paths)
+        paths = redirect(paths)
+        paths = redirect(paths)
+        paths = redirect(paths)
+        paths = redirect(paths)
+        paths = redirect(paths)
+        paths = redirect(paths)
+        paths = redirect(paths)
+        paths = redirect(paths)
+        paths = redirect(paths)
+        paths = redirect(paths)
+        paths = redirect(paths)
+        paths = redirect(paths)
+        paths = redirect(paths)
+        paths = redirect(paths)
+        paths = redirect(paths)
+        paths = redirect(paths)
+
+        manual_paths: set[str] = set()
+        for m_line in paths:
+            m_line = 'A' + m_line
+            base_paths: set[str] = {''}
+            for src, dst in itertools.pairwise(m_line):
+                # print(f'{src} -> {dst}')
+                new_paths = set()
+                for seq in sorted(all_moves(DPAD_TO_POINT[dst], src=DPAD_TO_POINT[src]), key=len)[0:1]:
+                    for path in sorted(base_paths, key=len)[0:1]:
+                        new_paths.add(path + seq + 'A')
+                base_paths = new_paths
+            for path in base_paths:
+                manual_paths.add(path)
+
+        # for path in manual_paths:
+        #     print(path)
+        shortest_path = min(manual_paths, key=len)
+        print(f'{line[1:]}: {len(shortest_path)} -> {shortest_path}')
+
+        result += len(shortest_path) * int(line[1:-1], 10)
+    return result
+
+
+def part_n(lines, n=2):
+    result = 0
+    for line in lines:
+        line = line.split(':')[0]
+        # line = '179A'
+        # print(f'line: {line}')
+        line = 'A' + line
+
+        # Make the robot 2 layer
+        paths: set[str] = {''}
+        for src, dst in itertools.pairwise(line):
+            # print(f'{src} -> {dst}')
+            new_paths = set()
+            for seq in all_moves(NUMPAD_TO_POINT[dst], src=NUMPAD_TO_POINT[src], is_dpad=False):
+                for path in paths:
+                    new_paths.add(path + seq + 'A')
+            paths = new_paths
+
+        for _ in range(n):
+            min_len = min(len(p) for p in paths)
+            paths = {p for p in paths if len(p) == min_len}
+            print(f'n: {_ + 1}, len(paths): {min_len} -> {len(paths)}')
+            paths = redirect_paths(paths)
+
+        shortest_path = min(paths, key=len)
+        print(f'{line[1:]}: {len(shortest_path)} -> {shortest_path}')
+
+        result += len(shortest_path) * int(line[1:-1], 10)
+    return result
+
+
+@cache
+def explode(path: str) -> list[str]:
+    return [p for p in path.split('A')]
+
+
+@cache
+def redirect_part(path_part: str) -> set[str]:
+    """
+    create all optimal length redirected paths for A + path_part + A
+    :param path_part:
+    :return:
+    """
+    paths: set[str] = set()
+    line = 'A' + path_part + 'A'
+
+    base_paths: set[str] = {''}
+    min_path_len = 10 ** 9
     for src, dst in itertools.pairwise(line):
-        print(f'{src} -> {dst}')
         new_paths = set()
-        for seq in all_moves(NUMPAD_TO_POINT[dst], src=NUMPAD_TO_POINT[src]):
-            for path in robot_2_paths:
+        for seq in all_moves(DPAD_TO_POINT[dst], src=DPAD_TO_POINT[src]):
+            for path in base_paths:
                 new_paths.add(path + seq + 'A')
-        robot_2_paths = new_paths
+        base_paths = new_paths
+    for path in base_paths:
+        if len(path) > min_path_len:
+            continue
+        elif len(path) < min_path_len:
+            min_path_len = len(path)
+            paths.clear()
+        paths.add(path)
 
+    return paths
+
+
+def redirect_path(path: str) -> set[str]:
+    path_parts = explode(path[:-1])
+    redirected_parts: list[set[str]] = [redirect_part(part) for part in path_parts]
+    paths = {''}
+    for part in redirected_parts:
+        paths = {''.join(q) for q in itertools.product(paths, part)}
+
+    min_len = min(len(p) for p in paths)
+    paths = {p for p in paths if len(p) == min_len}
+
+    return paths
+
+
+def redirect_paths(paths: set[str]) -> set[str]:
+    return {path for p in paths for path in redirect_path(p)}
+
+
+def redirect(robot_2_paths):
+    # Make the robot 1 layer
     robot_1_paths: set[str] = set()
     for r1_line in robot_2_paths:
         r1_line = 'A' + r1_line
@@ -33,33 +217,17 @@ def day21(lines):
         for src, dst in itertools.pairwise(r1_line):
             # print(f'{src} -> {dst}')
             new_paths = set()
+            best_seq_len = 10 ** 9
             for seq in all_moves(DPAD_TO_POINT[dst], src=DPAD_TO_POINT[src]):
+                if len(seq) < best_seq_len:
+                    best_seq_len = len(seq)
+                    new_paths.clear()
                 for path in base_paths:
                     new_paths.add(path + seq + 'A')
             base_paths = new_paths
         for path in base_paths:
             robot_1_paths.add(path)
-
-    manual_paths: set[str] = set()
-    for m_line in robot_1_paths:
-        m_line = 'A' + m_line
-        base_paths: set[str] = {''}
-        for src, dst in itertools.pairwise(m_line):
-            # print(f'{src} -> {dst}')
-            new_paths = set()
-            for seq in all_moves(DPAD_TO_POINT[dst], src=DPAD_TO_POINT[src]):
-                for path in base_paths:
-                    new_paths.add(path + seq + 'A')
-            base_paths = new_paths
-        for path in base_paths:
-            manual_paths.add(path)
-
-    # for path in manual_paths:
-    #     print(path)
-    shortest_path = min(manual_paths, key=len)
-    print(shortest_path)
-
-    return 0, 0
+    return robot_1_paths
 
 
 NUMPAD = ['789', '456', '123', ' 0A']
@@ -91,7 +259,7 @@ def expand(line: str, src=DPAD_TO_POINT['A'], prefixes: set[str] = None) -> set[
 
 
 @cache
-def all_moves(dst: Point, src: Point = DPAD_TO_POINT['A'], and_key: bool = False) -> set[str]:
+def all_moves(dst: Point, src: Point = DPAD_TO_POINT['A'], and_key: bool = False, is_dpad=True) -> set[str]:
     """
     return all possible paths on a pad that move from src to dst
     :param src: src point on the pad
@@ -104,37 +272,57 @@ def all_moves(dst: Point, src: Point = DPAD_TO_POINT['A'], and_key: bool = False
 
     if delta.x < 0:
         path += '<' * abs(delta.x)
-    elif delta.x > 0:
-        path += '>' * delta.x
-
+    if delta.y > 0:
+        path += 'v' * delta.y
     if delta.y < 0:
         path += '^' * abs(delta.y)
-    elif delta.y > 0:
-        path += 'v' * delta.y
+    if delta.x > 0:
+        path += '>' * delta.x
 
-    movesets = {''.join(p) for p in itertools.permutations(path)}
+    movesets = {path for path in {''.join(p) for p in itertools.permutations(path)} if is_valid(path, src, is_dpad)}
+
     if and_key:
         movesets = {m + 'A' for m in movesets}
     return movesets
 
 
-DPAD_TO_DPAD_SEQUENCES = {
-    '^': all_moves(DPAD_TO_POINT['^'], and_key=True),
-    'v': all_moves(DPAD_TO_POINT['v'], and_key=True),
-    '<': all_moves(DPAD_TO_POINT['<'], and_key=True),
-    '>': all_moves(DPAD_TO_POINT['>'], and_key=True),
-    'A': {'A'},
-}
+def is_valid(path: str, src: Point, is_dpad=True) -> bool:
+    pos = src
+    for c in path:
+        match c:
+            case '^':
+                pos = pos + Point(0, -1)
+            case 'v':
+                pos = pos + Point(0, 1)
+            case '<':
+                pos = pos + Point(-1, 0)
+            case '>':
+                pos = pos + Point(1, 0)
+
+        if is_dpad:
+            if POINT_TO_DPAD[pos] == ' ':  # out of bounds
+                return False
+        else:
+            if POINT_TO_NUMPAD[pos] == ' ':  # out of bounds
+                return False
+    return True
+
+
+def test_is_invalid():
+    path = '<<v'
+    src = DPAD_TO_POINT['A']
+
+    assert not is_valid(path, src, is_dpad=True)
 
 
 def test_all_moves():
     src = Point(1, 1)  # 5
     dst = Point(2, 3)  # A
-    assert all_moves(dst, src) == {'>vv', 'v>v', 'vv>'}
+    assert all_moves(dst, src, is_dpad=False) == {'>vv', 'v>v', 'vv>'}
 
     src = Point(2, 3)  # A
     dst = Point(0, 1)  # 8
-    assert all_moves(dst, src) == {'<<^^', '<^<^', '<^^<', '^<<^', '^<^<', '^^<<'}
+    assert all_moves(dst, src, is_dpad=False) == {'<<^^', '<^<^', '<^^<', '^<<^', '^<^<', '^^<<'}
 
 
 def test_dpad_to_point():
