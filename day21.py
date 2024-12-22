@@ -6,60 +6,13 @@ from utils import Point, with_lines
 
 @with_lines
 def day21(lines):
-    result_a = part_n(lines, 2)
-    print(result_a)
+    result_a = part_nx(lines, 2)
+    result_b = part_nx(lines, 25)
 
-    result_b = part_n(lines, 25)
-    # result_b = 0
-
-    # 106038 is too low for result_a
     return result_a, result_b
 
 
-def part1x(lines):
-    result = 0
-    for line in lines:
-        line = line.split(':')[0]
-        # line = '179A'
-        # print(f'line: {line}')
-        line = 'A' + line
-
-        # Make the robot 2 layer
-        robot_2_paths: set[str] = {''}
-        for src, dst in itertools.pairwise(line):
-            # print(f'{src} -> {dst}')
-            new_paths = set()
-            for seq in all_moves(NUMPAD_TO_POINT[dst], src=NUMPAD_TO_POINT[src], is_dpad=False):
-                for path in robot_2_paths:
-                    new_paths.add(path + seq + 'A')
-            robot_2_paths = new_paths
-
-        robot_1_paths = redirect(robot_2_paths)
-
-        manual_paths: set[str] = set()
-        for m_line in robot_1_paths:
-            m_line = 'A' + m_line
-            base_paths: set[str] = {''}
-            for src, dst in itertools.pairwise(m_line):
-                # print(f'{src} -> {dst}')
-                new_paths = set()
-                for seq in sorted(all_moves(DPAD_TO_POINT[dst], src=DPAD_TO_POINT[src]), key=len)[0:1]:
-                    for path in sorted(base_paths, key=len)[0:1]:
-                        new_paths.add(path + seq + 'A')
-                base_paths = new_paths
-            for path in base_paths:
-                manual_paths.add(path)
-
-        # for path in manual_paths:
-        #     print(path)
-        shortest_path = min(manual_paths, key=len)
-        print(f'{line[1:]}: {len(shortest_path)} -> {shortest_path}')
-
-        result += len(shortest_path) * int(line[1:-1], 10)
-    return result
-
-
-def part2x(lines):
+def part_nx(lines, n=2):
     result = 0
     for line in lines:
         line = line.split(':')[0]
@@ -76,90 +29,41 @@ def part2x(lines):
                 for path in paths:
                     new_paths.add(path + seq + 'A')
             paths = new_paths
+        ### Good up until here
 
-        paths = redirect(paths)
-        paths = redirect(paths)
-        paths = redirect(paths)
-        paths = redirect(paths)
-        paths = redirect(paths)
-        paths = redirect(paths)
-        paths = redirect(paths)
-        paths = redirect(paths)
-        paths = redirect(paths)
-        paths = redirect(paths)
-        paths = redirect(paths)
-        paths = redirect(paths)
-        paths = redirect(paths)
-        paths = redirect(paths)
-        paths = redirect(paths)
-        paths = redirect(paths)
-        paths = redirect(paths)
-        paths = redirect(paths)
-        paths = redirect(paths)
-        paths = redirect(paths)
-        paths = redirect(paths)
-        paths = redirect(paths)
-        paths = redirect(paths)
-        paths = redirect(paths)
-        paths = redirect(paths)
+        min_path_cost = 10 ** 20
+        for path in paths:
+            path_parts = explode(path)
+            part_costs = [0] * len(path_parts)
+            for i, part in enumerate(path_parts):
+                part_costs[i] = cost(part, n)
+            path_cost = sum(part_costs)
+            if path_cost < min_path_cost:
+                min_path_cost = path_cost
 
-        manual_paths: set[str] = set()
-        for m_line in paths:
-            m_line = 'A' + m_line
-            base_paths: set[str] = {''}
-            for src, dst in itertools.pairwise(m_line):
-                # print(f'{src} -> {dst}')
-                new_paths = set()
-                for seq in sorted(all_moves(DPAD_TO_POINT[dst], src=DPAD_TO_POINT[src]), key=len)[0:1]:
-                    for path in sorted(base_paths, key=len)[0:1]:
-                        new_paths.add(path + seq + 'A')
-                base_paths = new_paths
-            for path in base_paths:
-                manual_paths.add(path)
-
-        # for path in manual_paths:
-        #     print(path)
-        shortest_path = min(manual_paths, key=len)
-        print(f'{line[1:]}: {len(shortest_path)} -> {shortest_path}')
-
-        result += len(shortest_path) * int(line[1:-1], 10)
-    return result
-
-
-def part_n(lines, n=2):
-    result = 0
-    for line in lines:
-        line = line.split(':')[0]
-        # line = '179A'
-        # print(f'line: {line}')
-        line = 'A' + line
-
-        # Make the robot 2 layer
-        paths: set[str] = {''}
-        for src, dst in itertools.pairwise(line):
-            # print(f'{src} -> {dst}')
-            new_paths = set()
-            for seq in all_moves(NUMPAD_TO_POINT[dst], src=NUMPAD_TO_POINT[src], is_dpad=False):
-                for path in paths:
-                    new_paths.add(path + seq + 'A')
-            paths = new_paths
-
-        for _ in range(n):
-            min_len = min(len(p) for p in paths)
-            paths = {p for p in paths if len(p) == min_len}
-            print(f'n: {_ + 1}, len(paths): {min_len} -> {len(paths)}')
-            paths = redirect_paths(paths)
-
-        shortest_path = min(paths, key=len)
-        print(f'{line[1:]}: {len(shortest_path)} -> {shortest_path}')
-
-        result += len(shortest_path) * int(line[1:-1], 10)
+        result += min_path_cost * int(line[1:-1], 10)
     return result
 
 
 @cache
+def cost(seq, depth):
+    if depth == 0:
+        return len(seq)
+
+    sub_sequences = redirect_part(seq)
+    sub_sequence_costs = [10 ** 20] * len(sub_sequences)
+
+    for i, part in enumerate(sub_sequences):
+        sub_parts = explode(part)
+        sub_part_costs = [cost(sub_part, depth - 1) for sub_part in sub_parts]
+        sub_sequence_costs[i] = sum(sub_part_costs)
+
+    return min(sub_sequence_costs)
+
+
+@cache
 def explode(path: str) -> list[str]:
-    return [p for p in path.split('A')]
+    return [p + 'A' for p in path[:-1].split('A')]
 
 
 @cache
@@ -170,10 +74,10 @@ def redirect_part(path_part: str) -> set[str]:
     :return:
     """
     paths: set[str] = set()
-    line = 'A' + path_part + 'A'
+    line = 'A' + path_part
 
     base_paths: set[str] = {''}
-    min_path_len = 10 ** 9
+    # min_path_len = 10 ** 9
     for src, dst in itertools.pairwise(line):
         new_paths = set()
         for seq in all_moves(DPAD_TO_POINT[dst], src=DPAD_TO_POINT[src]):
@@ -181,11 +85,11 @@ def redirect_part(path_part: str) -> set[str]:
                 new_paths.add(path + seq + 'A')
         base_paths = new_paths
     for path in base_paths:
-        if len(path) > min_path_len:
-            continue
-        elif len(path) < min_path_len:
-            min_path_len = len(path)
-            paths.clear()
+        # if len(path) > min_path_len:
+        #     continue
+        # elif len(path) < min_path_len:
+        #     min_path_len = len(path)
+        #     paths.clear()
         paths.add(path)
 
     return paths
@@ -197,9 +101,6 @@ def redirect_path(path: str) -> set[str]:
     paths = {''}
     for part in redirected_parts:
         paths = {''.join(q) for q in itertools.product(paths, part)}
-
-    min_len = min(len(p) for p in paths)
-    paths = {p for p in paths if len(p) == min_len}
 
     return paths
 
