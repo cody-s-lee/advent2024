@@ -1,6 +1,7 @@
 from sortedcontainers import SortedList
 
-from utils import CARDINAL_DIRECTIONS, Point, is_example, with_lines
+from point import CARDINAL_DIRECTIONS, Point
+from utils import is_example, with_lines
 
 
 def find_shortest_path_length(width, height, start, exit, corruption):

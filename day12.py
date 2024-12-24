@@ -1,4 +1,5 @@
-from utils import CARDINAL_DIRECTIONS, E, N, Point, S, W, add_points, neighbors, one_of, with_lines
+from point import CARDINAL_DIRECTIONS, E, N, Point, S, W, add_points, neighbors
+from utils import one_of, with_lines
 
 Region = set[Point]
 

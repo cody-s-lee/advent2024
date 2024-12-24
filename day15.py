@@ -1,7 +1,8 @@
 from enum import Enum, StrEnum
 from typing import Tuple
 
-from utils import E, N, Point, S, W, with_content
+from point import E, N, Point, S, W
+from utils import with_content
 
 
 @with_content

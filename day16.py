@@ -3,7 +3,8 @@ from typing import NamedTuple, Optional
 
 from sortedcontainers import SortedList
 
-from utils import Direction, NEXT_DIRECTION, PREV_DIRECTION, Point, with_lines
+from point import Direction, NEXT_DIRECTION, PREV_DIRECTION, Point
+from utils import with_lines
 
 
 @with_lines

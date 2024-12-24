@@ -153,7 +153,7 @@ class Node:
         node = self.n
         while node:
             s += f' ({node.x})'
-            node = node.n
+            node = node._n
         return s
 
     @staticmethod
@@ -161,16 +161,16 @@ class Node:
         n = 0
         while node:
             n += 1
-            node = node.n
+            node = node._n
         return n
 
     @staticmethod
     def str(node):
         s = str(node.x)
-        node = node.n
+        node = node._n
         while node:
             s += " " + str(node.x)
-            node = node.n
+            node = node._n
 
         return s
 

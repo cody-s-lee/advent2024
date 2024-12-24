@@ -1,7 +1,8 @@
 from collections import defaultdict
 from copy import copy
 
-from utils import Point, with_lines
+from point import Point
+from utils import with_lines
 
 
 @with_lines

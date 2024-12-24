@@ -1,6 +1,7 @@
 from collections import namedtuple
 
-from utils import Point, add_points, with_lines
+from point import Point, add_points
+from utils import with_lines
 
 ### Notes:
 ## "Smart"

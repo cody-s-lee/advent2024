@@ -1,6 +1,7 @@
 from collections import defaultdict
 
-from utils import CARDINAL_DIRECTIONS, Point, is_example, with_lines
+from point import CARDINAL_DIRECTIONS, Point
+from utils import is_example, with_lines
 
 
 @with_lines

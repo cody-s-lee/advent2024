@@ -2,7 +2,8 @@ import re
 from collections import defaultdict
 from copy import copy
 
-from utils import CARDINAL_DIRECTIONS, Point, is_example, neighbors, with_lines
+from point import CARDINAL_DIRECTIONS, Point, neighbors
+from utils import is_example, with_lines
 
 
 @with_lines

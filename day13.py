@@ -2,7 +2,8 @@ import re
 
 import numpy as np
 
-from utils import Point, with_content
+from point import Point
+from utils import with_content
 
 MACHINE_RE = re.compile(r'^Button A: X\+(\d+), Y\+(\d+)\nButton B: X\+(\d+), Y\+(\d+)\nPrize: X=(\d+), Y=(\d+)$',
                         re.MULTILINE)
